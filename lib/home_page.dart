@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_tambal_ban/helper/api.dart';
+import 'package:flutter_tambal_ban/login_page.dart';
 import 'package:flutter_tambal_ban/register.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -14,6 +15,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var _vechile = "*";
   final List<Widget> _bengkel = [];
 
   @override
@@ -31,15 +33,63 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             onPressed: () {
-              Get.to(() => const RegisterPage());
+              Get.to(() => getLocation());
             },
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.refresh),
           ),
           IconButton(
             onPressed: () {
-              getLocation();
+              Get.to(() => const LoginPage());
             },
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.add_box),
+          ),
+          IconButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Center(
+                    child: Text("Pilih Kendaraan"),
+                  ),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Get.back();
+                          setState(() {
+                            _vechile = "MOBIL";
+                          });
+                          getLocation();
+                        },
+                        child: const Text("MOBIL"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Get.back();
+                          setState(() {
+                            _vechile = "MOTOR";
+                          });
+                          getLocation();
+                        },
+                        child: const Text("MOTOR"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Get.back();
+                          setState(() {
+                            _vechile = "*";
+                          });
+                          getLocation();
+                        },
+                        child: const Text("SEMUA"),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.filter_alt),
           ),
         ],
       ),
@@ -62,13 +112,13 @@ class _HomePageState extends State<HomePage> {
 
   void getBengkel(double lat, double lon) {
     Api.postData(context, "https://tambal.agungj.com/bengkel/cari",
-        {"latitude": lat, "longitude": lon, "type": "all"}).then((value) {
+        {"latitude": lat, "longitude": lon, "vechile": _vechile}).then((value) {
       _bengkel.clear();
       for (int i = 0; i < value!.data!.length; i++) {
         _bengkel.add(
           InkWell(
             onTap: () {
-              showDetail(value.data);
+              showDetail(value.data![i]);
             },
             child: Card(
               clipBehavior: Clip.antiAlias,
@@ -189,13 +239,13 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void showDetail(List? data) {
+  void showDetail(data) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Center(
           child: Text(
-            data![0]['nama_bengkel'],
+            data!['nama_bengkel'],
           ),
         ),
         content: Column(
@@ -215,29 +265,28 @@ class _HomePageState extends State<HomePage> {
                 TableRow(children: [
                   const Text("Alamat"),
                   const Text(":"),
-                  Text(data[0]['alamat'], textAlign: TextAlign.end),
+                  Text(data['alamat'], textAlign: TextAlign.end),
                 ]),
                 TableRow(children: [
                   const Text("Phone"),
                   const Text(":"),
-                  Text(data[0]['phone'], textAlign: TextAlign.end),
+                  Text(data['phone'], textAlign: TextAlign.end),
                 ]),
                 TableRow(children: [
                   const Text("Operasional"),
                   const Text(":"),
-                  Text(
-                      "${data[0]['jam_buka']}:00 s/d ${data[0]['jam_tutup']}:00",
+                  Text("${data['jam_buka']}:00 s/d ${data['jam_tutup']}:00",
                       textAlign: TextAlign.end),
                 ]),
                 TableRow(children: [
                   const Text("Motor"),
                   const Text(":"),
                   Text(
-                    data[0]['motor'],
+                    data['motor'],
                     textAlign: TextAlign.end,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: data[0]['motor'] == "TERSEDIA"
+                      color: data['motor'] == "TERSEDIA"
                           ? Colors.green[900]
                           : Colors.red[900],
                     ),
@@ -247,11 +296,11 @@ class _HomePageState extends State<HomePage> {
                   const Text("Mobil"),
                   const Text(":"),
                   Text(
-                    data[0]['mobil'],
+                    data['mobil'],
                     textAlign: TextAlign.end,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: data[0]['mobil'] == "TERSEDIA"
+                      color: data['mobil'] == "TERSEDIA"
                           ? Colors.green[900]
                           : Colors.red[900],
                     ),
@@ -261,11 +310,11 @@ class _HomePageState extends State<HomePage> {
                   const Text("Jarak"),
                   const Text(":"),
                   Text(
-                    "${data[0]['jarak']} Km",
+                    "${data['jarak']} Km",
                     textAlign: TextAlign.end,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: data[0]['jarak'] < 2.0
+                      color: data['jarak'] < 2.0
                           ? Colors.green[900]
                           : Colors.red[900],
                     ),
@@ -279,7 +328,7 @@ class _HomePageState extends State<HomePage> {
           ElevatedButton(
             onPressed: () async {
               String googleMapsUrl =
-                  "https://www.google.com/maps/search/?api=1&query=${data[0]['latitude']},${data[0]['longitude']}";
+                  "https://www.google.com/maps/search/?api=1&query=${data['latitude']},${data['longitude']}";
               Get.back();
               bukaBrowser(googleMapsUrl);
             },

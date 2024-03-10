@@ -7,6 +7,7 @@ class Style {
     return InputDecoration(
       hintText: hint,
       prefixIcon: icon,
+      label: Text(hint),
       filled: true,
       contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
       border: OutlineInputBorder(

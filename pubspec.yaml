@@ -37,11 +37,22 @@ dependencies:
   cupertino_icons: ^1.0.2
   dio: any
   flutter_easyloading: any
+  # flutter_launcher_icons: "^0.13.1"
+  # flutter_app_name: ^0.1.1
   geocoding: any
   geolocator: any
   get: any
+  image_picker: any
   permission_handler: any
   url_launcher: any
+
+# flutter_app_name:
+#   name: "Tambal Ban"
+
+# flutter_icons:
+#   android: "launcher_icon"
+#   ios: true
+#   image_path: "assets/app_logo.jpg"
 
 dev_dependencies:
   flutter_test:

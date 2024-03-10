@@ -48,13 +48,15 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void cekPermission() async {
-    PermissionStatus status = await Permission.location.request();
+    Map<Permission, PermissionStatus> status = await [
+      Permission.location,
+      Permission.camera
+    ].request();
     log(status.toString());
-    if (status == PermissionStatus.granted) {
+    if (status.values.every((status) => status == PermissionStatus.granted)) {
       Get.to(() => const HomePage());
     } else {
-      Get.snackbar(
-          "Maaf", "Harap izinkan penggunaan Lokasi Anda Terlebih dahulu");
+      Get.snackbar("Maaf", "Harap izinkan seluruh izin yang diperlukan");
     }
   }
 }
